@@ -13,10 +13,6 @@ if (isset($_POST['root']) && $_POST['root']) {
     $status_msg = '失败';
 
     $users = array(
-        'wuzeguo',
-        'lixijiang',
-        'wangyineng',
-        'xianghua'
     );
     $do = $do_arr[$_POST['type']];
     if (!in_array($_POST['passport'], $users)) {
