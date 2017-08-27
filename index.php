@@ -1,58 +1,12 @@
 <?php 
 error_reporting(E_ALL & ~E_WARNING & ~E_NOTICE );
 
-$root_name = array('1' => '小滨汽修');
-$root_dir = array('1' => 'xiaobinqixiu');
+include_once('./svn.class.php');
 
-$status_msg = '无';
+$svn_obj = new svn();
+
 if (isset($_POST['root']) && $_POST['root']) {
-
-    $do_arr = array(1=>'update', 2=>'add', 3=>'commit');
-
-    $error = array();
-    $status_msg = '失败';
-
-    $users = array(
-    );
-    $do = $do_arr[$_POST['type']];
-    if (!in_array($_POST['passport'], $users)) {
-        $error = array('用户不合法');
-    }elseif (!$do) {
-        $error = array('请选择正确的操作类型');
-    }elseif ($do== 'commit' && !$_POST['dir']) {
-        $error = array('请填写正确的目录');
-    } else {
-
-        //dir
-        $root = 'E:/workspace/' . $root_dir[$_POST['root']] . '/';
-        $dir = $root . $_POST['dir'];
-
-        //excu
-        if ($do == 'update') {
-                $bash = 'svn update ' . $dir;
-        } elseif ($do == 'add') {
-                $bash = 'svn add ' . $dir;
-        } elseif ($do == 'commit') {
-                $msg = $_POST['message'];
-                $msg = $msg ? iconv("UTF-8", "GB2312//IGNORE", $msg) : 'fix';
-                $msg = $msg . '  --' . $_POST['passport'];
-                $bash = 'svn commit -m "' . $msg . '"  ' .  $dir;
-        }
-
-        if (is_dir($dir) || file_exists($dir)) {
-            exec("$bash", $out,$status);
-            //var_dump($out);
-            //echo $status;
-            if ($status == 0) {
-                $status_msg = '成功';
-                $error = $out;
-            } else {
-                $error = $out;
-            }
-        } else {
-            $error = array('目录或文件不存在，请重试');
-        }
-    }
+    $svn_obj->doSVN();
 }
 
 ?>
@@ -103,7 +57,7 @@ if (isset($_POST['root']) && $_POST['root']) {
             <div class="pm-input-state">
               <!--div class="pm-form-label-text">需要操作的目录</div-->
               <select id="mySelect" name="root">
-                <?php foreach($root_name AS $k =>$v) {?>
+                <?php foreach($svn_obj->project_name AS $k =>$v) {?>
                 <option value="<?php echo $k ?>" ><?php echo $v ?></option>
                 <?php }?>
               </select>
@@ -134,8 +88,8 @@ if (isset($_POST['root']) && $_POST['root']) {
         <ul class="status">
           <li>
             <h5>状态:</h5>
-            <h5 style="color:red;"><?php echo $status_msg ?></h5> </br>
-            <?php foreach ($error AS $v) { ?>
+            <h5 style="color:red;"><?php echo $svn_obj->status_msg ?></h5> </br>
+            <?php foreach ($svn_obj->error AS $v) { ?>
             <h5 style="color:red;font-size:12px"><?php echo $v ?></h5></br>
             <?php }?>
           </li>
